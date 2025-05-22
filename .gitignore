@@ -1,6 +1,8 @@
 # Ignore images folder contents but keep the folder structure
 images/*
 !images/.gitkeep
+!images/logo.png
+!images/finished*.jpg
 
 # System files
 .DS_Store
