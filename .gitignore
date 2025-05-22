@@ -1,0 +1,13 @@
+# Ignore images folder contents but keep the folder structure
+images/*
+!images/.gitkeep
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.idea/
+.vscode/
+*.swp
+*.swo 
