@@ -117,6 +117,9 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
+    // Standardize carousel images when the page loads
+    standardizeCarouselImages();
+
     // Create indicators
     carouselItems.forEach((_, index) => {
       const indicator = document.createElement("div");
@@ -181,6 +184,51 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  // Function to standardize carousel images
+  function standardizeCarouselImages() {
+    carouselItems.forEach((item) => {
+      const image = item.querySelector(".carousel-image img");
+
+      if (image) {
+        // Add load event listener to handle images after they're loaded
+        image.addEventListener("load", function () {
+          // Ensure parent container maintains aspect ratio
+          const container = this.closest(".carousel-image");
+          if (container) {
+            container.style.display = "flex";
+            container.style.justifyContent = "center";
+            container.style.alignItems = "center";
+            container.style.overflow = "hidden";
+
+            // Detect if image is tall or wide
+            const imgRatio = this.naturalWidth / this.naturalHeight;
+            const containerRatio =
+              container.clientWidth / container.clientHeight;
+
+            // For very tall images, ensure they're centered horizontally
+            if (imgRatio < 0.75) {
+              // If image is taller than it is wide
+              this.style.objectPosition = "center center";
+            }
+            // For wide images, ensure they're centered vertically
+            else if (imgRatio > 1.5) {
+              this.style.objectPosition = "center center";
+            }
+          }
+        });
+
+        // Force reload of images to trigger load event
+        if (image.complete) {
+          const src = image.src;
+          image.src = "";
+          setTimeout(() => {
+            image.src = src;
+          }, 10);
+        }
+      }
+    });
+  }
+
   // Update carousel dimensions
   function updateCarousel() {
     const carouselContainer = document.querySelector(".carousel-container");
@@ -218,6 +266,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const containerWidth = carouselTrack.parentElement.clientWidth;
     const centerOffset = (containerWidth - itemWidth) / 2;
 
+    // Ensure items are vertically centered
+    carouselItems.forEach((item) => {
+      item.style.display = "flex";
+      item.style.alignItems = "center";
+      item.style.justifyContent = "center";
+    });
+
     carouselTrack.style.left = `${centerOffset}px`;
   }
 
@@ -231,16 +286,43 @@ document.addEventListener("DOMContentLoaded", function () {
 
     currentIndex = index;
 
-    // Update track position
+    // Update track position with smooth animation
     const translateX = -currentIndex * itemWidth;
     carouselTrack.style.transform = `translateX(${translateX}px)`;
 
     // Update active classes
     carouselItems.forEach((item, i) => {
       item.classList.remove("active");
+
       // Add active class to current item
       if (i === currentIndex) {
         item.classList.add("active");
+
+        // Bring active item to front with z-index
+        item.style.zIndex = "10";
+
+        // Create a full-screen effect for active item
+        if (window.innerWidth >= 768) {
+          // Apply on tablets and desktops
+          item.style.position = "relative";
+
+          // Make sure active item is centered vertically
+          item.style.display = "flex";
+          item.style.alignItems = "center";
+
+          // Add slight delay to allow transition to complete
+          setTimeout(() => {
+            positionTrack();
+          }, 50);
+        }
+      } else {
+        // Reset z-index for non-active items but maintain vertical centering
+        item.style.zIndex = "1";
+        item.style.position = "";
+
+        // Ensure non-active items are vertically centered
+        item.style.display = "flex";
+        item.style.alignItems = "center";
       }
     });
 
